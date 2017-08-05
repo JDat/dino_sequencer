@@ -44,47 +44,70 @@
 const String boot PROGMEM =
 
   // Write your program here
-  "0" wait soundoff motor1on motor2on next
+  "0" wait soundoff motor1off motor2off next
   finish
   // end of program
 
   ;
 
 const String standby PROGMEM =
-
+/*
   // Write your program here
   "0" wait next
   finish
   // end of program
+*/
+
+    // Write your program here
+  "0" wait soundon next
+  "3" wait soundoff next
+  finish
+  // end of program
+
 
   ;
-
   
 const String program PROGMEM =
 
-
+/*
   // Write your program here
   "0" wait soundon motor6off motor7off motor3on motor4on next
-  "10" wait motor3off next
-  "10" wait motor4off next
-  "20" wait soundoff next
+  "1" wait motor3off next
+  "1" wait motor4off next
+  "2" wait soundoff next
+  finish
+  // end of program
+*/
+    // Write your program here
+  "0" wait soundon next
+  "3" wait soundoff next
   finish
   // end of program
 
   ;
 
-#define inputPin 13
-#define inputMode INPUT_PULLUP
+
+#define pinIn0 A0
+#define pinIn1 A1
+#define pinIn2 A2
+#define pinIn3 A3
+#define pinIn4 A4
+#define pinIn5 A5
+//#define inputMode INPUT_PULLUP
+#define inputMode INPUT
 //#define invert
 
-#define pin0 2
-#define pin1 3
-#define pin2 4
-#define pin3 5
-#define pin4 6
-#define pin5 7
-#define pin6 8
-#define pin7 9
+#define pin0 11
+#define pin1 10
+#define pin2 9
+#define pin3 8
+#define pin4 7
+#define pin5 6
+#define pin6 5
+#define pin7 LED_BUILTIN
+#define pinLatch 12
+
+const uint8_t inputPins[] PROGMEM = {pinIn0,pinIn1,pinIn2,pinIn3,pinIn4,pinIn5};
 
 const uint8_t pins[] PROGMEM = {pin0,pin1,pin2,pin3,pin4,pin5,pin6,pin7};
 
@@ -124,6 +147,7 @@ void digitToPin(String s) {
 }
 
 void setPins(){
+  digitalWrite(pinLatch,LOW);
   for (uint8_t i=0;i<8;i++){
     if (bitRead(execData.pins, i)) {
       digitalWrite(pins[i],HIGH);
@@ -131,7 +155,8 @@ void setPins(){
     else {
       digitalWrite(pins[i],LOW);
     }
-  }
+  }  
+  digitalWrite(pinLatch,HIGH);
   delay(execData.del);
 }
 void parseData(String s) {
@@ -164,10 +189,16 @@ void parseLines(String s) {
 
 void setup() {
   Serial.begin(9600);
-
-  pinMode(inputPin,inputMode);
+  while (!Serial) {
+    ; // wait for serial port to connect. Needed for native USB port only
+  }
+  for (uint8_t i=0;i<6;i++){
+    pinMode(inputPins[i],inputMode);
+  }
+  //pinMode(inputPin,inputMode);
   for (uint8_t i=0;i<8;i++){
-    pinMode(pins[i],OUTPUT); 
+    pinMode(pins[i],OUTPUT);
+    digitalWrite(pins[i],LOW); 
   }
   
   Serial.println("Exec BOOT");
@@ -175,13 +206,24 @@ void setup() {
 
 }
 
+
 bool inputTrigger(){
-  #ifdef invert
-    return digitalRead(inputPin);
-  #endif
-  #ifndef invert
-    return !digitalRead(inputPin);
-  #endif
+    for (uint8_t i=0;i<6;i++){
+        Serial.print("Pin: ");
+        Serial.print(i);
+        Serial.print(", state: ");
+        Serial.println(digitalRead(inputPins[i]),BIN);
+      #ifdef invert
+        if (!digitalRead(inputPins[i]))
+          return true;
+      #endif      
+      #ifndef invert
+        if (digitalRead(inputPins[i]))
+          return true;
+      #endif      
+        
+    }
+    return false;
 }
 void loop() {
   if (inputTrigger()){
