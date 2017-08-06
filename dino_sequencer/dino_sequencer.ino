@@ -34,7 +34,7 @@
   programmas beigaas obligaati vajag vaardu finish
 
   piemeers:
-  "0" wait soundon motor1on motor2on next
+  "1" wait soundon motor1on motor2on next
   "10" wait motor1off next
   "10" wait motor2off next
   "20" wait sounoOff next
@@ -44,72 +44,60 @@
 const String boot PROGMEM =
 
   // Write your program here
-  "0" wait soundoff motor1off motor2off next
+  "3" wait motor1on motor2on next
+  "1" wait motor1off motor2off next
   finish
   // end of program
 
   ;
 
 const String standby PROGMEM =
-/*
   // Write your program here
-  "0" wait next
+  "1" wait motor1off motor2off motor3off motor4off motor5off motor6off motor7off soundoff next
   finish
   // end of program
-*/
-
-    // Write your program here
-  "0" wait soundon next
-  "3" wait soundoff next
-  finish
-  // end of program
-
 
   ;
   
 const String program PROGMEM =
-
-/*
   // Write your program here
-  "0" wait soundon motor6off motor7off motor3on motor4on next
-  "1" wait motor3off next
-  "1" wait motor4off next
-  "2" wait soundoff next
-  finish
-  // end of program
-*/
-    // Write your program here
-  "0" wait soundon next
-  "3" wait soundoff next
+  "6" wait motor3on motor4on motor5on next
+
+  "5" wait motor2on motor3off motor6on motor7on next
+
+  "6" wait motor3on soundon next
+  "2" wait motor1on motor4off motor5off motor7off next
   finish
   // end of program
 
   ;
 
-
+/*
 #define pinIn0 A0
 #define pinIn1 A1
 #define pinIn2 A2
 #define pinIn3 A3
 #define pinIn4 A4
 #define pinIn5 A5
+*/
+#define inputPin A5
 //#define inputMode INPUT_PULLUP
 #define inputMode INPUT
-//#define invert
+#define invert
 
-#define pin0 11
-#define pin1 10
-#define pin2 9
-#define pin3 8
-#define pin4 7
-#define pin5 6
-#define pin6 5
-#define pin7 LED_BUILTIN
+#define pin0 4
+#define pin1 5
+#define pin2 6
+#define pin3 7
+#define pin4 8
+#define pin5 9
+#define pin6 10
+#define pin7 11
 #define pinLatch 12
 
-const uint8_t inputPins[] PROGMEM = {pinIn0,pinIn1,pinIn2,pinIn3,pinIn4,pinIn5};
+//const uint8_t inputPins[] = {pinIn0,pinIn1,pinIn2,pinIn3,pinIn4,pinIn5};
 
-const uint8_t pins[] PROGMEM = {pin0,pin1,pin2,pin3,pin4,pin5,pin6,pin7};
+const uint8_t pins[] = {pin0,pin1,pin2,pin3,pin4,pin5,pin6,pin7};
 
 typedef struct _execData {
   long del;
@@ -147,16 +135,21 @@ void digitToPin(String s) {
 }
 
 void setPins(){
-  digitalWrite(pinLatch,LOW);
+  digitalWrite(pinLatch,HIGH);
   for (uint8_t i=0;i<8;i++){
+      //Serial.print("Pin: ");
+      //Serial.print(i);
+
     if (bitRead(execData.pins, i)) {
+      //Serial.println(" HIGH");
       digitalWrite(pins[i],HIGH);
     }
     else {
+      //Serial.println(" LOW");
       digitalWrite(pins[i],LOW);
     }
   }  
-  digitalWrite(pinLatch,HIGH);
+  digitalWrite(pinLatch,LOW);
   delay(execData.del);
 }
 void parseData(String s) {
@@ -192,14 +185,18 @@ void setup() {
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
   }
+  /*
   for (uint8_t i=0;i<6;i++){
     pinMode(inputPins[i],inputMode);
   }
-  //pinMode(inputPin,inputMode);
+  */
+  pinMode(inputPin,inputMode);
   for (uint8_t i=0;i<8;i++){
     pinMode(pins[i],OUTPUT);
     digitalWrite(pins[i],LOW); 
   }
+
+  pinMode(pinLatch,OUTPUT);
   
   Serial.println("Exec BOOT");
   parseLines(boot);
@@ -208,6 +205,16 @@ void setup() {
 
 
 bool inputTrigger(){
+      #ifdef invert
+        if (!digitalRead(inputPin))
+          return true;
+      #endif      
+      #ifndef invert
+        if (digitalRead(inputPin))
+          return true;
+      #endif      
+ 
+  /*
     for (uint8_t i=0;i<6;i++){
         Serial.print("Pin: ");
         Serial.print(i);
@@ -223,6 +230,7 @@ bool inputTrigger(){
       #endif      
         
     }
+    */
     return false;
 }
 void loop() {
