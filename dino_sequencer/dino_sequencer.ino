@@ -44,8 +44,9 @@
 const String boot PROGMEM =
 
   // Write your program here
-  "3" wait motor1on motor2on next
-  "1" wait motor1off motor2off next
+  "3000" wait motor1on motor2on next
+  "100" wait motor1off motor2off next
+
   finish
   // end of program
 
@@ -53,7 +54,9 @@ const String boot PROGMEM =
 
 const String standby PROGMEM =
   // Write your program here
-  "1" wait motor1off motor2off motor3off motor4off motor5off motor6off motor7off soundoff next
+   "1000" wait motor1off motor2off motor3off motor4off motor5off motor6off motor7off soundoff next
+  //"1000" wait motor1off motor2off motor3off motor4off motor5off motor6off motor7off soundoff next
+  //"1000" wait motor1on motor2on motor3on motor4on motor5on motor6on motor7on soundon next
   finish
   // end of program
 
@@ -61,12 +64,39 @@ const String standby PROGMEM =
   
 const String program PROGMEM =
   // Write your program here
-  "6" wait motor3on motor4on motor5on next
-
-  "5" wait motor2on motor3off motor6on motor7on next
-
-  "6" wait motor3on soundon next
-  "2" wait motor1on motor4off motor5off motor7off next
+  "4000" wait motor3on motor5on next                        //00:00:08
+  "3000" wait motor3off motor4on motor5on next              //00:00:12
+  "2000" wait motor2on motor3on motor4off motor5off soundon next  //00:00:15
+  "3000" wait motor1on next                                  //00:00:17
+  "3000" wait motor2off motor3off motor4on motor5on next    //00:00:20
+  "3000" wait motor3on motor4off next                       //00:00:23
+  "3000" wait motor3off motor4on motor5off next             //00:00:26
+  "4000" wait motor2on motor3on motor4off motor5on next     //00:00:29
+  "4000" wait motor3off motor4on motor5off next             //00:00:33
+  "4000" wait motor4off next                                //00:00:37
+  "2000" wait motor1off motor2off motor3on motor4on motor5on next               //00:00:41
+  "5000" wait motor4off motor5off soundoff next                      //00:00:43
+  "2000" wait motor4on soundon next                                 //00:00:48
+  "4000" wait motor1on motor2on motor4off motor5on next     //00:00:50
+  "4000" wait motor3off motor4on motor5off next             //00:00:54
+  "4000" wait motor2off motor3on motor4off motor5on next    //00:00:58
+  "8000" wait motor2on motor3off motor5off next             //00:01:02
+  "4000" wait motor4on next                                 //00:01:10
+  "2000" wait motor1off motor2off motor3on motor4off motor5on next  //00:01:14
+  "5000" wait motor3off motor4on motor5off soundoff next    //00:01:16
+  "2000" wait motor3on motor4on motor5on soundon next       //00:01:21
+  "3000" wait motor1on motor3off motor5off next             //00:01:23
+  "3000" wait motor2on motor4off next                       //00:01:26
+  "3000" wait motor3on motor5on next                        //00:01:29
+  "3000" wait motor2off motor3off motor4on motor5on next    //00:01:32 
+  "3000" wait motor2on motor4off motor5off next             //00:01:35
+  "3000" wait motor4on motor5on next                        //00:01:38
+  "3000" wait motor2off motor3on motor4off next             //00:01:41
+  "3000" wait motor2on motor3off motor5on next              //00:01:44
+  "3000" wait motor1off motor4on next                       //00:01:47             
+  "30000" wait motor2off motor4off motor5off soundoff next   //00:01:49   
+  //"1000" wait motor1off motor2off motor3off motor4off motor5off soundoff next   
+  
   finish
   // end of program
 
@@ -159,7 +189,8 @@ void parseData(String s) {
   //Serial.println(s);
   tmp = s.substring(0, i);
   //Serial.println(tmp);
-  execData.del = tmp.toInt() * 1000;
+  //execData.del = tmp.toInt() * 1000;    //for seconds
+  execData.del = tmp.toInt();           //for milliseconds
   //Serial.print("Delay (ms): ");
   //Serial.println(execData.del);
   //Serial.println("Old state: ");
@@ -167,7 +198,7 @@ void parseData(String s) {
   tmp=s.substring(i+1);
   digitToPin(tmp);
   setPins();
-  //Serial.println("New state: ");
+  Serial.println("New state: ");
   //listPinState();
 }
 void parseLines(String s) {
@@ -182,9 +213,9 @@ void parseLines(String s) {
 
 void setup() {
   Serial.begin(9600);
-  while (!Serial) {
+  //while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
-  }
+  //}
   /*
   for (uint8_t i=0;i<6;i++){
     pinMode(inputPins[i],inputMode);
